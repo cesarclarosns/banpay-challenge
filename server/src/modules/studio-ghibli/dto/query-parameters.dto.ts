@@ -5,6 +5,7 @@ import { IsArray, IsOptional, IsString, Max } from 'class-validator';
 export class QueryParametersDto {
   @ApiProperty({
     description: 'Comma-separated list of fields to include in the response',
+    required: false,
   })
   @IsOptional()
   @Transform(({ value }) => value.split(','))
@@ -12,7 +13,10 @@ export class QueryParametersDto {
   @IsString({ each: true })
   fields?: string[];
 
-  @ApiProperty({ description: 'Amount of results (default 50) (maximum 250)' })
+  @ApiProperty({
+    description: 'Amount of results (default 50) (maximum 250)',
+    required: false,
+  })
   @IsOptional()
   @Transform(({ value }) => +value)
   @Max(250)

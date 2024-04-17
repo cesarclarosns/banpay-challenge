@@ -5,6 +5,7 @@ import {
   Delete,
   ForbiddenException,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Query,
@@ -13,6 +14,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -23,6 +25,7 @@ import {
 } from '@nestjs/swagger';
 import { Request } from 'express';
 
+import { AUTH_TOKENS } from '../auth/constants/auth-tokens';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { FindAllUsersDto } from './dto/find-all-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -31,6 +34,7 @@ import { UserDto } from './dto/user.dto';
 import { UsersService } from './users.service';
 
 @ApiTags('users')
+@ApiBearerAuth(AUTH_TOKENS.accessToken)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -54,7 +58,10 @@ export class UsersController {
   @ApiNotFoundResponse()
   @ApiUnauthorizedResponse()
   async findOne(@Param('id') id: string) {
-    return await this.usersService.findOneById(id);
+    const user = await this.usersService.findOneById(id);
+    if (!user) throw new NotFoundException();
+
+    return user;
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
@@ -75,7 +82,10 @@ export class UsersController {
 
     if (userId !== id) throw new ForbiddenException();
 
-    return await this.usersService.update(id, updateUserDto);
+    const user = await this.usersService.update(id, updateUserDto);
+    if (!user) throw new NotFoundException();
+
+    return user;
   }
 
   @Roles(['admin'])
@@ -83,13 +93,16 @@ export class UsersController {
   @Delete(':id')
   @ApiOperation({ summary: 'Removes an user' })
   @ApiParam({ description: 'User ID', name: 'id' })
-  @ApiOkResponse()
+  @ApiOkResponse({ type: UserDto })
   @ApiBadRequestResponse()
   @ApiNotFoundResponse()
   @ApiUnauthorizedResponse()
   @ApiForbiddenResponse()
   async remove(@Param('id') id: string) {
-    return await this.usersService.remove(id);
+    const user = await this.usersService.remove(id);
+    if (!user) throw new NotFoundException();
+
+    return user;
   }
 
   @Roles(['admin'])
@@ -106,6 +119,9 @@ export class UsersController {
     @Param('id') id: string,
     @Body() updateUserRoleDto: UpdateUserRoleDto,
   ) {
-    return await this.usersService.updateRole(id, updateUserRoleDto);
+    const user = await this.usersService.updateRole(id, updateUserRoleDto);
+    if (!user) throw new NotFoundException();
+
+    return user;
   }
 }

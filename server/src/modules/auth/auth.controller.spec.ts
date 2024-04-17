@@ -1,3 +1,5 @@
+import '@mocks/config/settings';
+
 import { TestBed } from '@automock/jest';
 
 import { AuthController } from './auth.controller';
@@ -13,4 +15,10 @@ describe('AuthController', () => {
   it('should be defined', () => {
     expect(authController).toBeDefined();
   });
+
+  describe('signIn', () => {});
+
+  describe('signUp', () => {});
+
+  describe('refresh', () => {});
 });

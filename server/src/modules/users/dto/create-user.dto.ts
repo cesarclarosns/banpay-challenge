@@ -18,7 +18,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   hashedPassword: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: String })
   @IsIn([] satisfies UserRole[])
   role: UserRole;
 

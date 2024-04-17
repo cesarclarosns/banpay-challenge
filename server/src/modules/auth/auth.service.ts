@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -14,7 +13,7 @@ import { UserDto } from '../users/dto/user.dto';
 import { UsersService } from '../users/users.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
-import { UpdatePasswordDto } from './dto/update-password.dto';
+import { TokensDto } from './dto/tokens.dto';
 import { TokenPayload } from './types/token-payload';
 
 @Injectable()
@@ -24,7 +23,7 @@ export class AuthService {
     private readonly usersService: UsersService,
   ) {}
 
-  async signIn(signInDto: SignInDto) {
+  async signIn(signInDto: SignInDto): Promise<TokensDto> {
     const user = await this.usersService.findOneByEmail(signInDto.email);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -40,7 +39,7 @@ export class AuthService {
     return await this.createTokens(user);
   }
 
-  async signUp(signUpDto: SignUpDto) {
+  async signUp(signUpDto: SignUpDto): Promise<UserDto> {
     const user = await this.usersService.findOneByEmail(signUpDto.email);
     if (user) throw new BadRequestException('Email is already registered');
 
@@ -58,7 +57,7 @@ export class AuthService {
     return newUser;
   }
 
-  async refreshTokens(userId: string) {
+  async refreshTokens(userId: string): Promise<TokensDto> {
     const user = await this.usersService.findOneById(userId);
     if (!user) throw new UnauthorizedException();
 
@@ -66,40 +65,24 @@ export class AuthService {
     return tokens;
   }
 
-  async createTokens(
-    user: UserDto,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  async createTokens(user: UserDto): Promise<TokensDto> {
     const payload = { role: user.role, sub: user.id } satisfies TokenPayload;
 
     const [accessToken, refreshToken] = await Promise.all([
-      this.createAccessToken(payload),
-      this.createRefreshToken(payload),
+      this.jwtService.signAsync(payload, {
+        expiresIn: settings.AUTH.JWT_ACCESS_EXPIRE_MINUTES * 60,
+        secret: settings.AUTH.JWT_ACCESS_SECRET,
+      }),
+      this.jwtService.signAsync(payload, {
+        expiresIn: settings.AUTH.JWT_REFRESH_EXPIRE_MINUTES * 60,
+        secret: settings.AUTH.JWT_REFRESH_SECRET,
+      }),
     ]);
 
     return { accessToken, refreshToken };
   }
 
-  async createAccessToken(payload: TokenPayload): Promise<string> {
-    return await this.jwtService.signAsync(payload, {
-      expiresIn: settings.AUTH.JWT_ACCESS_EXPIRE_MINUTES * 60,
-      secret: settings.AUTH.JWT_ACCESS_SECRET,
-    });
-  }
-
-  async createRefreshToken(payload: TokenPayload): Promise<string> {
-    return await this.jwtService.signAsync(payload, {
-      expiresIn: settings.AUTH.JWT_REFRESH_EXPIRE_MINUTES * 60,
-      secret: settings.AUTH.JWT_REFRESH_SECRET,
-    });
-  }
-
-  async createPasswordHash(password: string) {
+  async createPasswordHash(password: string): Promise<string> {
     return await argon2.hash(password);
-  }
-
-  async updatePassword(userId: string, { password }: UpdatePasswordDto) {
-    const hashedPassword = await this.createPasswordHash(password);
-    const user = await this.usersService.update(userId, { hashedPassword });
-    if (!user) throw new NotFoundException();
   }
 }

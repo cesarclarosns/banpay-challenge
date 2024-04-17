@@ -26,4 +26,8 @@ export class SpeciesDto {
 
   @ApiProperty({ description: 'Unique url of the species' })
   url: string;
+
+  constructor(partial: Partial<SpeciesDto>) {
+    Object.assign(this, partial);
+  }
 }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
@@ -51,20 +51,24 @@ export class UsersService {
     return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<UserDto> {
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserDto | null> {
     const document = await this.userModel.findOneAndUpdate(
       { _id: id },
       { $set: updateUserDto },
       { new: true },
     );
-    if (!document) throw new NotFoundException();
+    if (!document) return null;
     const user = new UserDto(document.toJSON());
     return user;
   }
 
-  async remove(id: string): Promise<void> {
-    const result = await this.userModel.deleteOne({ _id: id });
-    if (!result.deletedCount) throw new NotFoundException();
+  async remove(id: string): Promise<UserDto | null> {
+    const document = await this.userModel.findOneAndDelete({ _id: id });
+    if (!document) return null;
+    return new UserDto(document.toJSON());
   }
 
   async updateRole(
@@ -76,7 +80,7 @@ export class UsersService {
       { $set: updateUserRoleDto },
       { new: true },
     );
-    if (!document) throw new NotFoundException();
+    if (!document) return null;
     return new UserDto(document.toJSON());
   }
 }

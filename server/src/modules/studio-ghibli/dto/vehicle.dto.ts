@@ -26,4 +26,8 @@ export class VehicleDto {
 
   @ApiProperty({ description: 'Unique URL of the vehicle' })
   url: string;
+
+  constructor(partial: Partial<VehicleDto>) {
+    Object.assign(this, partial);
+  }
 }

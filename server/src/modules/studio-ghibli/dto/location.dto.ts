@@ -26,4 +26,8 @@ export class LocationDto {
 
   @ApiProperty({ description: 'Individual URL of the location' })
   url: string;
+
+  constructor(partial: Partial<LocationDto>) {
+    Object.assign(this, partial);
+  }
 }

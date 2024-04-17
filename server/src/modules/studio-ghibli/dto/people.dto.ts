@@ -33,4 +33,8 @@ export class PeopleDto {
 
   @ApiProperty({ description: 'Unique url of the person' })
   url: string;
+
+  constructor(partial: Partial<PeopleDto>) {
+    Object.assign(this, partial);
+  }
 }

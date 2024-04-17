@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { randomUUID } from 'crypto';
 import { LoggerModule } from 'nestjs-pino';
 
 import { settings } from './config/settings';
@@ -16,12 +17,14 @@ import { UsersModule } from './modules/users/users.module';
   imports: [
     LoggerModule.forRoot({
       pinoHttp: {
-        level: 'trace',
-        transport: {
-          target: 'pino-pretty',
-        },
+        genReqId: (request) =>
+          request.headers['x-correlation-id'] || randomUUID(),
+        level: process.env.NODE_ENV !== 'prod' ? 'debug' : 'info',
+        transport:
+          process.env.NODE_ENV !== 'prod'
+            ? { target: 'pino-pretty' }
+            : undefined,
       },
-      useExisting: true,
     }),
     ThrottlerModule.forRoot({
       throttlers: [

@@ -16,7 +16,7 @@ export class UserDto {
   @Exclude()
   hashedPassword: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: String })
   role: UserRole;
 
   constructor(partial: Partial<UserDto>) {

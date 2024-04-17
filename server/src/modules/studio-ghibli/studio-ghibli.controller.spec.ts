@@ -13,4 +13,15 @@ describe('StudioGhibliController', () => {
   it('should be defined', () => {
     expect(studioGhibliController).toBeDefined();
   });
+
+  describe('findAllFilms', () => {});
+  describe('findOneFilm', () => {});
+  describe('findAllPeople', () => {});
+  describe('findOnePeople', () => {});
+  describe('findAllLocations', () => {});
+  describe('findOneLocation', () => {});
+  describe('findAllSpecies', () => {});
+  describe('findOneSpecies', () => {});
+  describe('findAllVehicles', () => {});
+  describe('findOneVehicles', () => {});
 });

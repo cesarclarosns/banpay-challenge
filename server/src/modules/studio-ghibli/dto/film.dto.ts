@@ -57,4 +57,8 @@ export class FilmDto {
 
   @ApiProperty({ description: 'URL of film' })
   url: string;
+
+  constructor(partial: Partial<FilmDto>) {
+    Object.assign(this, partial);
+  }
 }

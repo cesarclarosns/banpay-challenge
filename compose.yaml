@@ -34,11 +34,10 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-      target: prod
     env_file:
       - ./server/.env
     ports:
-      - "4000:4000"
+      - "3000:3000"
 
 volumes:
   db-data:

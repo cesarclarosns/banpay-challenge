@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Patch,
   Post,
   Req,
   Res,
@@ -14,6 +13,8 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBody,
+  ApiCookieAuth,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -28,7 +29,6 @@ import { Public } from './decorators/public.decorator';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { TokensDto } from './dto/tokens.dto';
-import { UpdatePasswordDto } from './dto/update-password.dto';
 import { RefreshTokenGuard } from './guards';
 
 @ApiTags('auth')
@@ -40,7 +40,16 @@ export class AuthController {
   @Post('sign-in')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Sign in' })
-  @ApiOkResponse({ type: TokensDto })
+  @ApiBody({ type: SignInDto })
+  @ApiOkResponse({
+    headers: {
+      'Set-Cookie': {
+        description:
+          'Set cookie "refreshToken" (httpOnly). This cookie will be used to retrieve an accessToken and rotate the refreshToken.',
+      },
+    },
+    type: TokensDto,
+  })
   @ApiBadRequestResponse()
   async signIn(
     @Res({ passthrough: true }) res: Response,
@@ -64,6 +73,7 @@ export class AuthController {
   @Post('sign-up')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Sign up' })
+  @ApiBody({ type: SignUpDto })
   @ApiOkResponse({ type: UserDto })
   @ApiBadRequestResponse()
   async signUp(@Body() signUpDto: SignUpDto) {
@@ -73,8 +83,17 @@ export class AuthController {
   @Public()
   @UseGuards(RefreshTokenGuard)
   @Get('refresh')
+  @ApiCookieAuth(AUTH_COOKIES.refreshToken)
   @ApiOperation({ summary: 'Refresh tokens' })
-  @ApiOkResponse({ type: TokensDto })
+  @ApiOkResponse({
+    headers: {
+      'Set-Cookie': {
+        description:
+          'Set cookie "refreshToken" (httpOnly). This cookie will be used to retrieve an accessToken and rotate the refreshToken.',
+      },
+    },
+    type: TokensDto,
+  })
   @ApiUnauthorizedResponse()
   async refresh(
     @Req() req: Request,
@@ -93,19 +112,5 @@ export class AuthController {
     });
 
     return { accessToken };
-  }
-
-  @Patch('password')
-  @ApiOperation({ summary: 'Update password' })
-  @ApiOkResponse()
-  @ApiUnauthorizedResponse()
-  @ApiBadRequestResponse()
-  async updatePassword(
-    @Req() req: Request,
-    @Body() updatePasswordDto: UpdatePasswordDto,
-  ) {
-    const userId = req.user.sub;
-
-    return await this.authService.updatePassword(userId, updatePasswordDto);
   }
 }
