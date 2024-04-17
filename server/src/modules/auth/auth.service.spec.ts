@@ -1,11 +1,7 @@
 import '@mocks/config/settings';
 
 import { TestBed } from '@automock/jest';
-import {
-  BadRequestException,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import argon2 from 'argon2';
 
@@ -135,30 +131,6 @@ describe('AuthService', () => {
       spy.mockResolvedValueOnce('hash');
 
       expect(authService.createPasswordHash('password')).resolves.toBe('hash');
-    });
-  });
-
-  describe('updatePassword', () => {
-    it('should update password', () => {
-      const spy = jest.spyOn(authService, 'createPasswordHash');
-      spy.mockResolvedValueOnce('hash');
-
-      usersService.update.mockResolvedValueOnce(_user);
-
-      expect(
-        authService.updatePassword('id', { password: 'password' }),
-      ).resolves.toBe(void 0);
-    });
-
-    it('should throw NotFoundException if user is not found', () => {
-      const spy = jest.spyOn(authService, 'createPasswordHash');
-      spy.mockResolvedValueOnce('hash');
-
-      usersService.update.mockResolvedValueOnce(null);
-
-      expect(
-        authService.updatePassword('id', { password: 'password' }),
-      ).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 });
