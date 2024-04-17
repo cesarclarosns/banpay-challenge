@@ -13,7 +13,7 @@
     - server/
         - Contiene una API Rest desarrollada con NestJS.
     - .github/workflows/
-        - Contiene un workflow para testear, construir y publicar la imagén Docker de la API Rest en DockerHub cada que se haga un push a la branch "current".
+        - Contiene un workflow para testear, construir y publicar la imagén Docker de la API Rest en [DockerHub](https://hub.docker.com/repository/docker/cesarclarosns/banpay-challenge/general) cada que se haga un push a la branch "current".
     - db/
         - Contiene un script que se usa para inicializar la base de datos (crear un usuario admin).
     - compose.yaml
@@ -61,7 +61,7 @@
 
     - Para implementar la funcionalidad del CRUD de usuarios y de tener usuarios con un rol, y poder consumir un GET de Studio Ghibli API de acuerdo a su rol, se optó por:
 
-        - Usar MongoDB como base de datos NoSQL debido a que se tiene más libertad sobre el schema, y en general las bases de datos NoSQL son más escalables. Guardando los siguientes datos de cada usuario: 'id', 'name', 'email', 'password' y 'role', y encriptando las contraseñas con Argon2.
+        - Usar MongoDB como base de datos NoSQL debido a que se tiene más libertad sobre el schema, y en general las bases de datos NoSQL son más escalables. Guardando los siguientes datos de cada usuario: 'id', 'name', 'email', 'hashedPassword' y 'role', y encriptando las contraseñas con Argon2.
 
         - Usar JWTs para manejar la autenticación, autorización (basada en roles) e identidad.
 
